@@ -7,15 +7,16 @@ sap.ui.define([
 	"sap/ui/test/matchers/PropertyStrictEquals",
 	"./Common",
 	"./shareOptions"
-], function(Opa5, Press, EnterText, AggregationLengthEquals, AggregationFilled, PropertyStrictEquals, Common, shareOptions) {
+], function (Opa5, Press, EnterText, AggregationLengthEquals, AggregationFilled, PropertyStrictEquals, Common, shareOptions) {
 	"use strict";
 
 	var sViewName = "Worklist",
 		sTableId = "table",
+		sAddButtonId = "addProductBtn",
 		sSearchFieldId = "searchField",
 		sSomethingThatCannotBeFound = "*#-Q@@||";
 
-	function allItemsInTheListContainTheSearchTerm (aControls) {
+	function allItemsInTheListContainTheSearchTerm(aControls) {
 		var oTable = aControls[0],
 			oSearchField = aControls[1],
 			aItems = oTable.getItems();
@@ -30,36 +31,36 @@ sap.ui.define([
 		});
 	}
 
-	function createWaitForItemAtPosition (oOptions) {
+	function createWaitForItemAtPosition(oOptions) {
 		var iPosition = oOptions.position;
 		return {
-			id : sTableId,
-			viewName : sViewName,
-			matchers : function (oTable) {
+			id: sTableId,
+			viewName: sViewName,
+			matchers: function (oTable) {
 				return oTable.getItems()[iPosition];
 			},
-			actions : oOptions.actions,
-			success : oOptions.success,
-			errorMessage : "Table in view '" + sViewName + "' does not contain an Item at position '" + iPosition + "'"
+			actions: oOptions.actions,
+			success: oOptions.success,
+			errorMessage: "Table in view '" + sViewName + "' does not contain an Item at position '" + iPosition + "'"
 		};
 	}
 
 	Opa5.createPageObjects({
 
-		onTheWorklistPage : {
-			baseClass : Common,
-			actions : Object.assign({
-				iPressATableItemAtPosition : function (iPosition) {
+		onTheWorklistPage: {
+			baseClass: Common,
+			actions: Object.assign({
+				iPressATableItemAtPosition: function (iPosition) {
 					return this.waitFor(createWaitForItemAtPosition({
-						position : iPosition,
-						actions : new Press()
+						position: iPosition,
+						actions: new Press()
 					}));
 				},
 
-				iRememberTheItemAtPosition : function (iPosition){
+				iRememberTheItemAtPosition: function (iPosition) {
 					return this.waitFor(createWaitForItemAtPosition({
-						position : iPosition,
-						success : function (oTableItem) {
+						position: iPosition,
+						success: function (oTableItem) {
 							var oBindingContext = oTableItem.getBindingContext();
 
 							// Don't remember objects just strings since IE will not allow accessing objects of destroyed frames
@@ -72,19 +73,19 @@ sap.ui.define([
 					}));
 				},
 
-				iPressOnMoreData : function (){
+				iPressOnMoreData: function () {
 					return this.waitFor({
-						id : sTableId,
-						viewName : sViewName,
-						matchers : function (oTable) {
+						id: sTableId,
+						viewName: sViewName,
+						matchers: function (oTable) {
 							return !!oTable.$("trigger").length;
 						},
-						actions : new Press(),
-						errorMessage : "The Table does not have a trigger"
+						actions: new Press(),
+						errorMessage: "The Table does not have a trigger"
 					});
 				},
 
-				iSearchForTheFirstObject: function() {
+				iSearchForTheFirstObject: function () {
 					var sFirstObjectTitle;
 
 					return this.waitFor({
@@ -93,7 +94,7 @@ sap.ui.define([
 						matchers: new AggregationFilled({
 							name: "items"
 						}),
-						success: function(oTable) {
+						success: function (oTable) {
 							sFirstObjectTitle = oTable.getItems()[0].getCells()[0].getTitle();
 
 							this.iSearchForValue(sFirstObjectTitle);
@@ -101,7 +102,7 @@ sap.ui.define([
 							this.waitFor({
 								id: [sTableId, sSearchFieldId],
 								viewName: sViewName,
-								check : allItemsInTheListContainTheSearchTerm,
+								check: allItemsInTheListContainTheSearchTerm,
 								errorMessage: "Did not find any table entries or too many while trying to search for the first object."
 							});
 						},
@@ -109,80 +110,96 @@ sap.ui.define([
 					});
 				},
 
-				iSearchForValueWithActions : function (aActions) {
+				iSearchForValueWithActions: function (aActions) {
 					return this.waitFor({
-						id : sSearchFieldId,
-						viewName : sViewName,
+						id: sSearchFieldId,
+						viewName: sViewName,
 						actions: aActions,
-						errorMessage : "Failed to find search field in Worklist view.'"
+						errorMessage: "Failed to find search field in Worklist view.'"
 					});
 				},
 
-				iSearchForValue : function (sSearchString) {
-					return this.iSearchForValueWithActions([new EnterText({text : sSearchString}), new Press()]);
+				iSearchForValue: function (sSearchString) {
+					return this.iSearchForValueWithActions([new EnterText({
+						text: sSearchString
+					}), new Press()]);
 				},
 
-				iTypeSomethingInTheSearchThatCannotBeFoundAndTriggerRefresh : function () {
+				iTypeSomethingInTheSearchThatCannotBeFoundAndTriggerRefresh: function () {
 					var fnEnterTextAndFireRefreshButtonPressedOnSearchField = function (oSearchField) {
 						// set the search field value directly as EnterText action triggers a search event
 						oSearchField.setValue(sSomethingThatCannotBeFound);
 
 						// fire the search to simulate a refresh button press
-						oSearchField.fireSearch({refreshButtonPressed: true});
+						oSearchField.fireSearch({
+							refreshButtonPressed: true
+						});
 					};
 					return this.iSearchForValueWithActions(fnEnterTextAndFireRefreshButtonPressedOnSearchField);
 				},
 
-				iClearTheSearch : function () {
-					return this.iSearchForValueWithActions([new EnterText({text: ""}), new Press()]);
+				iClearTheSearch: function () {
+					return this.iSearchForValueWithActions([new EnterText({
+						text: ""
+					}), new Press()]);
 				},
 
-				iSearchForSomethingWithNoResults : function () {
-					return this.iSearchForValueWithActions([new EnterText({text: sSomethingThatCannotBeFound}), new Press()]);
-				}
+				iSearchForSomethingWithNoResults: function () {
+					return this.iSearchForValueWithActions([new EnterText({
+						text: sSomethingThatCannotBeFound
+					}), new Press()]);
+				},
 
+				iPressAdd: function () {
+					return this.waitFor({
+						id: sAddButtonId,
+						viewName: sViewName,
+						actions: new Press(),
+						errorMessage: "Add button not found"
+					});
+				}
 			}, shareOptions.createActions(sViewName)),
 
 			assertions: Object.assign({
 
-				iShouldSeeTheTable : function () {
+				iShouldSeeTheTable: function () {
 					return this.waitFor({
-						id : sTableId,
-						viewName : sViewName,
-						success : function (oTable) {
+						id: sTableId,
+						viewName: sViewName,
+						success: function (oTable) {
 							Opa5.assert.ok(oTable, "Found the object Table");
 						},
-						errorMessage : "Can't see the master Table."
+						errorMessage: "Can't see the master Table."
 					});
 				},
 
-				theTableShowsOnlyObjectsWithTheSearchStringInTheirTitle : function () {
+				theTableShowsOnlyObjectsWithTheSearchStringInTheirTitle: function () {
 					this.waitFor({
-						id : [sTableId, sSearchFieldId],
-						viewName : sViewName,
-						check:  allItemsInTheListContainTheSearchTerm,
-						success : function () {
+						id: [sTableId, sSearchFieldId],
+						viewName: sViewName,
+						check: allItemsInTheListContainTheSearchTerm,
+						success: function () {
 							Opa5.assert.ok(true, "Every item did contain the title");
 						},
-						errorMessage : "The table did not have items"
+						errorMessage: "The table did not have items"
 					});
 				},
 
-				theTableHasEntries : function () {
+				theTableHasEntries: function () {
 					return this.waitFor({
-						viewName : sViewName,
-						id : sTableId,
-						matchers : new AggregationFilled({
-							name : "items"
+						viewName: sViewName,
+						id: sTableId,
+						matchers: new AggregationFilled({
+							name: "items"
 						}),
-						success : function () {
+						success: function () {
 							Opa5.assert.ok(true, "The table has entries");
 						},
-						errorMessage : "The table had no entries"
+						errorMessage: "The table had no entries"
 					});
 				},
 
-				theTableShouldHaveAllEntries : function () {
+				theTableShouldHaveAllEntries: function () {
 					var aAllEntities,
 						iExpectedNumberOfItems;
 
@@ -195,106 +212,118 @@ sap.ui.define([
 					}));
 
 					return this.waitFor({
-						id : sTableId,
-						viewName : sViewName,
-						matchers : function (oTable) {
+						id: sTableId,
+						viewName: sViewName,
+						matchers: function (oTable) {
 							// If there are less items in the list than the growingThreshold, only check for this number.
 							iExpectedNumberOfItems = Math.min(oTable.getGrowingThreshold(), aAllEntities.length);
-							return new AggregationLengthEquals({name : "items", length : iExpectedNumberOfItems}).isMatching(oTable);
+							return new AggregationLengthEquals({
+								name: "items",
+								length: iExpectedNumberOfItems
+							}).isMatching(oTable);
 						},
-						success : function (oTable) {
-							Opa5.assert.strictEqual(oTable.getItems().length, iExpectedNumberOfItems, "The growing Table has " + iExpectedNumberOfItems + " items");
+						success: function (oTable) {
+							Opa5.assert.strictEqual(oTable.getItems().length, iExpectedNumberOfItems, "The growing Table has " +
+								iExpectedNumberOfItems + " items");
 						},
-						errorMessage : "Table does not have all entries."
+						errorMessage: "Table does not have all entries."
 					});
 				},
 
-				theTitleShouldDisplayTheTotalAmountOfItems : function () {
+				theTitleShouldDisplayTheTotalAmountOfItems: function () {
 					return this.waitFor({
-						id : sTableId,
-						viewName : sViewName,
-						matchers : new AggregationFilled({name : "items"}),
-						success : function (oTable) {
+						id: sTableId,
+						viewName: sViewName,
+						matchers: new AggregationFilled({
+							name: "items"
+						}),
+						success: function (oTable) {
 							var iObjectCount = oTable.getBinding("items").getLength();
 							this.waitFor({
-								id : "tableHeader",
-								viewName : sViewName,
-								matchers : function (oPage) {
+								id: "tableHeader",
+								viewName: sViewName,
+								matchers: function (oPage) {
 									var sExpectedText = oPage.getModel("i18n").getResourceBundle().getText("worklistTableTitleCount", [iObjectCount]);
-									return new PropertyStrictEquals({name : "text", value: sExpectedText}).isMatching(oPage);
+									return new PropertyStrictEquals({
+										name: "text",
+										value: sExpectedText
+									}).isMatching(oPage);
 								},
-								success : function () {
+								success: function () {
 									Opa5.assert.ok(true, "The Page has a title containing the number " + iObjectCount);
 								},
-								errorMessage : "The Page's header does not container the number of items " + iObjectCount
+								errorMessage: "The Page's header does not container the number of items " + iObjectCount
 							});
 						},
-						errorMessage : "The table has no items."
+						errorMessage: "The table has no items."
 					});
 				},
 
-				theTableShouldHaveTheDoubleAmountOfInitialEntries : function () {
+				theTableShouldHaveTheDoubleAmountOfInitialEntries: function () {
 					var iExpectedNumberOfItems;
 
 					return this.waitFor({
-						id : sTableId,
-						viewName : sViewName,
-						matchers : function (oTable) {
+						id: sTableId,
+						viewName: sViewName,
+						matchers: function (oTable) {
 							iExpectedNumberOfItems = oTable.getGrowingThreshold() * 2;
-							return new AggregationLengthEquals({name : "items", length : iExpectedNumberOfItems}).isMatching(oTable);
+							return new AggregationLengthEquals({
+								name: "items",
+								length: iExpectedNumberOfItems
+							}).isMatching(oTable);
 						},
-						success : function () {
+						success: function () {
 							Opa5.assert.ok(true, "The growing Table had the double amount: " + iExpectedNumberOfItems + " of entries");
 						},
-						errorMessage : "Table does not have the double amount of entries."
+						errorMessage: "Table does not have the double amount of entries."
 					});
 				},
 
-				theTableShouldContainOnlyFormattedUnitNumbers : function () {
+				theTableShouldContainOnlyFormattedUnitNumbers: function () {
 					return this.theUnitNumbersShouldHaveTwoDecimals("sap.m.ObjectNumber",
 						sViewName,
 						"Object numbers are properly formatted",
 						"Table has no entries which can be checked for their formatting");
 				},
 
-				iShouldSeeTheWorklistViewsBusyIndicator : function () {
+				iShouldSeeTheWorklistViewsBusyIndicator: function () {
 					return this.waitFor({
-						id : "page",
-						viewName : sViewName,
-						success : function (oPage) {
+						id: "page",
+						viewName: sViewName,
+						success: function (oPage) {
 							Opa5.assert.ok(oPage.getParent().getBusy(), "The worklist view is busy");
 						},
-						errorMessage : "The worklist view is not busy"
+						errorMessage: "The worklist view is not busy"
 					});
 				},
 
-				iShouldSeeTheWorklistTableBusyIndicator : function () {
+				iShouldSeeTheWorklistTableBusyIndicator: function () {
 					return this.waitFor({
-						id : "table",
-						viewName : sViewName,
-						matchers : new PropertyStrictEquals({
-							name : "busy",
+						id: "table",
+						viewName: sViewName,
+						matchers: new PropertyStrictEquals({
+							name: "busy",
 							value: true
 						}),
-						autoWait : false,
-						success : function () {
+						autoWait: false,
+						success: function () {
 							Opa5.assert.ok(true, "The worklist table is busy");
 						},
-						errorMessage : "The worklist table is not busy"
+						errorMessage: "The worklist table is not busy"
 					});
 				},
 
-				iShouldSeeTheNoDataTextForNoSearchResults : function () {
+				iShouldSeeTheNoDataTextForNoSearchResults: function () {
 					return this.waitFor({
-						id : sTableId,
-						viewName : sViewName,
-						success : function (oTable) {
+						id: sTableId,
+						viewName: sViewName,
+						success: function (oTable) {
 							Opa5.assert.strictEqual(
 								oTable.getNoDataText(),
 								oTable.getModel("i18n").getProperty("worklistNoDataWithSearchText"),
 								"the table should show the no data text for search");
 						},
-						errorMessage : "table does not show the no data text for search"
+						errorMessage: "table does not show the no data text for search"
 					});
 				}
 			}, shareOptions.createAssertions(sViewName))

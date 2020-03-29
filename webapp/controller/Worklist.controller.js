@@ -64,6 +64,10 @@ sap.ui.define([
 		/* event handlers                                              */
 		/* =========================================================== */
 
+		onAddProdBtnPress: function () {
+			this.getRouter().navTo("addProduct");
+		},
+
 		/**
 		 * Triggered by the table's 'updateFinished' event: after new table
 		 * data is available, this handler method updates the table counter.

@@ -69,6 +69,9 @@
 			},
 			"": {
 				"dataSource": "mainService",
+				"settings": {
+					"defaultBindingMode": "TwoWay"
+				},
 				"preload": true
 			}
 		},
@@ -86,22 +89,23 @@
 				},
 				"async": true
 			},
-			"routes": [
-				{
-					"pattern": "",
-					"name": "worklist",
-					"target": [
-						"worklist"
-					]
-				},
-				{
-					"pattern": "ProductSet/{objectId}",
-					"name": "object",
-					"target": [
-						"object"
-					]
-				}
-			],
+			"routes": [{
+				"pattern": "",
+				"name": "worklist",
+				"target": [
+					"worklist"
+				]
+			}, {
+				"pattern": "ProductSet/{objectId}",
+				"name": "object",
+				"target": [
+					"object"
+				]
+			}, {
+				"pattern": "AddProduct",
+				"name": "addProduct",
+				"target": "addProduct"
+			}],
 			"targets": {
 				"worklist": {
 					"viewName": "Worklist",
@@ -114,6 +118,11 @@
 					"viewId": "object",
 					"viewLevel": 2,
 					"title": "{i18n>objectViewTitle}"
+				},
+				"addProduct": {
+					"viewName": "AddProduct",
+					"viewId": "addProduct",
+					"viewLevel": 3
 				},
 				"objectNotFound": {
 					"viewName": "ObjectNotFound",
